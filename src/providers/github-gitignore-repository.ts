@@ -45,7 +45,7 @@ export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
 		return new Promise((resolve, reject) => {
 			// If cached, return cached content
 			const item = this.cache.get('gitignore/' + path) as GitignoreTemplate[];
-			if(typeof item !== 'undefined') {
+			if (typeof item !== 'undefined') {
 				resolve(item);
 				return;
 			}
@@ -55,17 +55,17 @@ export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
 				-H "Accept: application/vnd.github.v3+json" \
 				https://api.github.com/gitignore/templates
 			*/
-			const fullUrl = new url.URL(path, 'https://api.github.com/repos/github/gitignore/contents/');
+			const fullUrl = new url.URL(path, 'https://api.github.com/repos/daoducminh/gitignore/contents/');
 			const options: https.RequestOptions = {
 				agent: getAgent(),
 				method: 'GET',
 				hostname: fullUrl.hostname,
 				path: fullUrl.pathname,
-				headers: {...getDefaultHeaders(), 'Accept': 'application/vnd.github.v3+json'},
+				headers: { ...getDefaultHeaders(), 'Accept': 'application/vnd.github.v3+json' },
 			};
 			const req = https.request(options, res => {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				const data : any[] = [];
+				const data: any[] = [];
 
 				console.log(`vscode-gitignore: Github API ratelimit remaining: ${res.headers['x-ratelimit-remaining']}`);
 
@@ -76,7 +76,7 @@ export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
 				res.on('end', () => {
 					const responseBody: string = Buffer.concat(data).toString();
 
-					if(res.statusCode !== 200) {
+					if (res.statusCode !== 200) {
 						return reject(responseBody);
 					}
 
@@ -99,9 +99,9 @@ export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
 					resolve(templates);
 				});
 			})
-			.on('error', err => {
-				return reject(err.message);
-			});
+				.on('error', err => {
+					return reject(err.message);
+				});
 
 			req.end();
 		});
@@ -116,28 +116,28 @@ export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
 			const file = fs.createWriteStream(operation.path, { flags: flags });
 
 			// If appending to the existing .gitignore file, write a NEWLINE as separator
-			if(flags === 'a') {
+			if (flags === 'a') {
 				file.write('\n');
 			}
 
 			/*
 			curl \
 				-H "Accept: application/vnd.github.v3.raw" \
-				https://api.github.com/repos/github/gitignore/contents/<path>
+				https://api.github.com/repos/daoducminh/gitignore/contents/<path>
 			*/
-			const fullUrl = new url.URL(operation.template.path, 'https://api.github.com/repos/github/gitignore/contents/');
+			const fullUrl = new url.URL(operation.template.path, 'https://api.github.com/repos/daoducminh/gitignore/contents/');
 			const options: https.RequestOptions = {
 				agent: getAgent(),
 				method: 'GET',
 				hostname: fullUrl.hostname,
 				path: fullUrl.pathname,
-				headers: {...getDefaultHeaders(), 'Accept': 'application/vnd.github.v3.raw'}
+				headers: { ...getDefaultHeaders(), 'Accept': 'application/vnd.github.v3.raw' }
 			};
 
 			const req = https.request(options, response => {
 				console.log(`vscode-gitignore: Github API ratelimit remaining: ${response.headers['x-ratelimit-remaining']}`);
 
-				if(response.statusCode !== 200) {
+				if (response.statusCode !== 200) {
 					return reject(new Error(`Download failed with status code ${response.statusCode}`));
 				}
 
@@ -149,9 +149,9 @@ export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
 				});
 			}).on('error', (err) => {
 				// Delete the .gitignore file if we created it
-				if(flags === 'w') {
+				if (flags === 'w') {
 					fs.unlink(operation.path, err => {
-						if(err) {
+						if (err) {
 							console.error(err.message);
 						}
 					});
@@ -167,7 +167,7 @@ export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
 	 * Downloads a .gitignore from the repository to the path passed
 	 */
 	public downloadToStream(operation: GitignoreOperation, stream: WriteStream): Promise<void> {
-		if(operation.template === null) {
+		if (operation.template === null) {
 			throw new Error('Template cannot be null');
 		}
 
@@ -175,21 +175,21 @@ export class GithubGitignoreRepositoryProvider implements GitignoreProvider {
 			/*
 			curl \
 				-H "Accept: application/vnd.github.v3.raw" \
-				https://api.github.com/repos/github/gitignore/contents/<path>
+				https://api.github.com/repos/daoducminh/gitignore/contents/<path>
 			*/
-			const fullUrl = new url.URL(operation.template.path, 'https://api.github.com/repos/github/gitignore/contents/');
+			const fullUrl = new url.URL(operation.template.path, 'https://api.github.com/repos/daoducminh/gitignore/contents/');
 			const options: https.RequestOptions = {
 				agent: getAgent(),
 				method: 'GET',
 				hostname: fullUrl.hostname,
 				path: fullUrl.pathname,
-				headers: {...getDefaultHeaders(), 'Accept': 'application/vnd.github.v3.raw'}
+				headers: { ...getDefaultHeaders(), 'Accept': 'application/vnd.github.v3.raw' }
 			};
 
 			const req = https.request(options, response => {
 				console.log(`vscode-gitignore: Github API ratelimit remaining: ${response.headers['x-ratelimit-remaining']}`);
 
-				if(response.statusCode !== 200) {
+				if (response.statusCode !== 200) {
 					return reject(new Error(`Download failed with status code ${response.statusCode}`));
 				}
 
